@@ -9,3 +9,149 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  email                String                 @unique
+  password             String
+  Availability         Availability?
+  OverRideAvailability OverRideAvailability[]
+
+  @@map("user")
+}
+
+model Appointment {
+  id                    Int                    @id @default(autoincrement())
+  date                  String?
+  startingTime          String?
+  endingTime            String?
+  services              String?
+  attachment            String?
+  status                APPOINTMENTSTATUS      @default(PENDING)
+  createdAt             DateTime               @default(now())
+  Availability          Availability[]
+  OverRideAvailability  OverRideAvailability[]
+  RescheduleAppointment RescheduleAppointment?
+}
+
+model RescheduleAppointment {
+  id            Int         @id @default(autoincrement())
+  date          String
+  startingTime  String?
+  endingTime    String?
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  appointmentId Int         @unique
+}
+
+model Availability {
+  id                   Int                    @id @default(autoincrement())
+  Appointment          Appointment[]
+  OverRideAvailability OverRideAvailability[]
+  user                 User?                  @relation(fields: [userId], references: [id])
+  sunday               Sunday?                @relation(fields: [sundayId], references: [id])
+  monday               Monday?                @relation(fields: [mondayId], references: [id])
+  tuesday              Tuesday?               @relation(fields: [tuesdayId], references: [id])
+  wednesday            Wednesday?             @relation(fields: [wednesdayId], references: [id])
+  thursday             Thursday?              @relation(fields: [thursdayId], references: [id])
+  friday               Friday?                @relation(fields: [fridayId], references: [id])
+  saturday             Saturday?              @relation(fields: [saturdayId], references: [id])
+  sundayId             Int                    @unique
+  mondayId             Int                    @unique
+  wednesdayId          Int                    @unique
+  tuesdayId            Int                    @unique
+  thursdayId           Int                    @unique
+  fridayId             Int                    @unique
+  saturdayId           Int                    @unique
+  userId               Int                    @unique
+}
+
+model Sunday {
+  id           Int           @id @default(autoincrement())
+  available    Boolean       @default(true)
+  clock        Clock[]
+  Availability Availability?
+}
+
+model Monday {
+  id           Int           @id @default(autoincrement())
+  available    Boolean       @default(true)
+  clock        Clock[]
+  Availability Availability?
+}
+
+model Tuesday {
+  id           Int           @id @default(autoincrement())
+  available    Boolean       @default(true)
+  clock        Clock[]
+  Availability Availability?
+}
+
+model Wednesday {
+  id           Int           @id @default(autoincrement())
+  available    Boolean       @default(true)
+  clock        Clock[]
+  Availability Availability?
+}
+
+model Thursday {
+  id           Int           @id @default(autoincrement())
+  available    Boolean       @default(true)
+  clock        Clock[]
+  Availability Availability?
+}
+
+model Friday {
+  id           Int           @id @default(autoincrement())
+  available    Boolean       @default(true)
+  clock        Clock[]
+  Availability Availability?
+}
+
+model Saturday {
+  id           Int           @id @default(autoincrement())
+  available    Boolean       @default(false)
+  clock        Clock[]
+  Availability Availability?
+}
+
+model Clock {
+  id          Int        @id @default(autoincrement())
+  startTime   String
+  endTime     String
+  available   Boolean    @default(true)
+  Sunday      Sunday?    @relation(fields: [sundayId], references: [id])
+  sundayId    Int?
+  Monday      Monday?    @relation(fields: [mondayId], references: [id])
+  mondayId    Int?
+  Tuesday     Tuesday?   @relation(fields: [tuesdayId], references: [id])
+  tuesdayId   Int?
+  Wednesday   Wednesday? @relation(fields: [wednesdayId], references: [id])
+  wednesdayId Int?
+  Thursday    Thursday?  @relation(fields: [thursdayId], references: [id])
+  thursdayId  Int?
+  Friday      Friday?    @relation(fields: [fridayId], references: [id])
+  fridayId    Int?
+  Saturday    Saturday?  @relation(fields: [saturdayId], references: [id])
+  saturdayId  Int?
+}
+
+model OverRideAvailability {
+  id             Int           @id @default(autoincrement())
+  overRideDate   String
+  startTime      String
+  endTime        String
+  available      Boolean       @default(true)
+  Availability   Availability? @relation(fields: [availabilityId], references: [id])
+  availabilityId Int?
+  Appointment    Appointment[]
+  user           User?         @relation(fields: [userId], references: [id])
+  userId         Int?
+}
+
+enum APPOINTMENTSTATUS {
+  PENDING
+  APPROVED
+  RESCHEDULED
+  REJECTED
+}
